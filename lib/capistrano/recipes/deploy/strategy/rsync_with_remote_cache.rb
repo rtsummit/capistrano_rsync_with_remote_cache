@@ -30,13 +30,19 @@ module Capistrano
         end
         
         def update_local_cache
-          system(command)
+          until system(command)
+          end
           mark_local_cache
         end
         
         def update_remote_cache
           finder_options = {:except => { :no_release => true }}
-          find_servers(finder_options).each {|s| system(rsync_command_for(s)) }
+          #find_servers(finder_options).each {|s| system(rsync_command_for(s)) }
+          find_servers(finder_options).each do |s|
+            cmd = rsync_command_for(s)
+            logger.trace "executing locally: #{cmd}"
+            logger.trace `#{cmd}`
+          end
         end
         
         def copy_remote_cache
@@ -44,7 +50,7 @@ module Capistrano
         end
         
         def rsync_command_for(server)
-          "rsync #{rsync_options} --rsh='ssh -p #{ssh_port(server)}' #{local_cache_path}/ #{rsync_host(server)}:#{repository_cache_path}/"
+          "rsync #{rsync_options} --rsh='sshpass -p #{configuration[:password]} ssh -p #{ssh_port(server)} -o StrictHostKeyChecking=no' #{local_cache_path}/ #{rsync_host(server)}:#{repository_cache_path}/"
         end
         
         def mark_local_cache
