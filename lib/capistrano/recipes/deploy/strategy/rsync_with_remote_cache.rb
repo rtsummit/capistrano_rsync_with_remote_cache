@@ -50,7 +50,7 @@ module Capistrano
         end
         
         def rsync_command_for(server)
-          skip_krb = fetch(:skip_kerberos, false)
+          skip_krb = fetch(:skip_kerberos, true)
           if skip_krb 
           "rsync #{rsync_options} --rsh='sshpass -p #{configuration[:password]} ssh -p #{ssh_port(server)} -o StrictHostKeyChecking=no' #{local_cache_path}/ #{rsync_host(server)}:#{repository_cache_path}/"
           else
