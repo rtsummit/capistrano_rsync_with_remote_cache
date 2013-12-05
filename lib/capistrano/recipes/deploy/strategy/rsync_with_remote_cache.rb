@@ -41,7 +41,13 @@ module Capistrano
           find_servers(finder_options).each do |s|
             cmd = rsync_command_for(s)
             logger.trace "executing locally: #{cmd}"
-            logger.trace `#{cmd}`
+            output = `#{cmd} 2>&1`
+            success=$?.success?
+            unless success
+              raise Exception.new("Failed rsync, output=#{output}, cmd=#{cmd}")
+            end
+            logger.trace "rsync result: #{output}" unless output.blank?
+            logger.trace "rsync success!"
           end
         end
         
